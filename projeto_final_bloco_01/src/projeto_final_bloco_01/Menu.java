@@ -1,18 +1,17 @@
 package projeto_final_bloco_01;
 
+
 import java.util.Scanner;
 
 import projeto_final_bloco_01.util.Cores;
-import projeto_final_bloco_01.model.Camisa;
+import projeto_final_bloco_01.controller.Controller;
 import projeto_final_bloco_01.model.Produto;
-import projeto_final_bloco_01.repository.ProdutoRepository;
-import projeto_final_bloco_01.repository.Repository;
 
 
 public class Menu {
     public static void main(String[] args) {
         Scanner leia = new Scanner(System.in);
-        Repository repositorio = new ProdutoRepository();
+        Controller controller = new Controller();
 
         while (true) {
             System.out.println("╔════════════════════════════════════════════════╗");
@@ -38,7 +37,7 @@ public class Menu {
             }
 
             if (opcao == 0) {
-                System.out.println(Cores.TEXT_GREEN_BOLD_BRIGHT + "✅ Obrigado por usar o sistema!");
+                System.out.println(Cores.TEXT_GREEN_BOLD_BRIGHT + "✅ Obrigado pela preferencia ! CRIADO POR: CRISTIANO FORNER");
                 leia.close();
                 System.exit(0);
             }
@@ -46,101 +45,88 @@ public class Menu {
             switch (opcao) {
                 case 1:
                     System.out.println("⚽️ Cadastrar Camisa");
-                    System.out.print("Nome da camisa: ");
-                    String nome = leia.nextLine();
-                    System.out.print("Preço: ");
-                    double preco;
                     try {
-                        preco = leia.nextDouble();
+                        System.out.print("Nome da camisa: ");
+                        String nome = leia.nextLine();
+                        System.out.print("Preço: ");
+                        double preco = leia.nextDouble();
                         leia.nextLine();
+                        System.out.print("Tamanho (P/M/G): ");
+                        String tamanho = leia.nextLine();
+                        controller.cadastrarCamisa(nome, preco, tamanho);
+                        System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa cadastrada com sucesso!" + Cores.TEXT_RESET);
                     } catch (java.util.InputMismatchException e) {
                         System.out.println(Cores.TEXT_RED_BOLD + "❌ Preço inválido!" + Cores.TEXT_RESET);
                         leia.nextLine();
-                        break;
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ " + e.getMessage() + Cores.TEXT_RESET);
                     }
-                    System.out.print("Tamanho (P/M/G): ");
-                    String tamanho = leia.nextLine();
-                    Produto camisa = new Camisa(0, nome, preco, tamanho); // ID será gerado pelo repositório
-                    repositorio.cadastrar(camisa);
-                    // Exibir o ID gerado (o ID é definido no repositório)
-                    System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa cadastrada com ID: " + camisa.getId() + Cores.TEXT_RESET);
                     break;
                 case 2:
                     System.out.println("📄 Listar Todas as Camisas");
-                    repositorio.listarTodos();
+                    try {
+                        var camisas = controller.listarCamisas();
+                        if (camisas.isEmpty()) {
+                            System.out.println("Nenhum produto cadastrado.");
+                        } else {
+                            for (Produto camisa : camisas) {
+                            	System.out.println(Cores.TEXT_YELLOW_BOLD + "ID: " + camisa.getId() + " - " + Cores.TEXT_RESET + camisa.exibirDetalhes());
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ Erro ao listar camisas: " + e.getMessage() + Cores.TEXT_RESET);
+                    }
                     break;
                 case 3:
                     System.out.println("🔍 Buscar Camisa por ID");
-                    System.out.print("Digite o ID: ");
-                    int idBuscar;
                     try {
-                        idBuscar = leia.nextInt();
+                        System.out.print("Digite o ID: ");
+                        int idBuscar = leia.nextInt();
                         leia.nextLine();
+                        Produto camisa = controller.buscarCamisaPorId(idBuscar);
+                        System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa encontrada: ID " + camisa.getId() + " - " + camisa.exibirDetalhes() + Cores.TEXT_RESET);
                     } catch (java.util.InputMismatchException e) {
                         System.out.println(Cores.TEXT_RED_BOLD + "❌ ID inválido!" + Cores.TEXT_RESET);
                         leia.nextLine();
-                        break;
-                    }
-                    Produto produto = repositorio.buscarPorId(idBuscar);
-                    if (produto != null) {
-                        System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa encontrada: ID " + produto.getId() + " - " + produto.exibirDetalhes() + Cores.TEXT_RESET);
-                    } else {
-                        System.out.println(Cores.TEXT_RED_BOLD + "❌ Produto não encontrado!" + Cores.TEXT_RESET);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ " + e.getMessage() + Cores.TEXT_RESET);
                     }
                     break;
                 case 4:
                     System.out.println("✏️ Atualizar Camisa");
-                    System.out.print("Digite o ID da camisa: ");
-                    int idAtualizar;
                     try {
-                        idAtualizar = leia.nextInt();
+                        System.out.print("Digite o ID da camisa: ");
+                        int idAtualizar = leia.nextInt();
                         leia.nextLine();
-                    } catch (java.util.InputMismatchException e) {
-                        System.out.println(Cores.TEXT_RED_BOLD + "❌ ID inválido!" + Cores.TEXT_RESET);
-                        leia.nextLine();
-                        break;
-                    }
-                    Produto produtoExistente = repositorio.buscarPorId(idAtualizar);
-                    if (produtoExistente != null) {
                         System.out.print("Novo nome da camisa: ");
                         String novoNome = leia.nextLine();
                         System.out.print("Novo preço: ");
-                        double novoPreco;
-                        try {
-                            novoPreco = leia.nextDouble();
-                            leia.nextLine();
-                        } catch (java.util.InputMismatchException e) {
-                            System.out.println(Cores.TEXT_RED_BOLD + "❌ Preço inválido!" + Cores.TEXT_RESET);
-                            leia.nextLine();
-                            break;
-                        }
+                        double novoPreco = leia.nextDouble();
+                        leia.nextLine();
                         System.out.print("Novo tamanho (P/M/G): ");
                         String novoTamanho = leia.nextLine();
-                        Produto camisaAtualizada = new Camisa(idAtualizar, novoNome, novoPreco, novoTamanho);
-                        repositorio.atualizar(camisaAtualizada);
+                        controller.atualizarCamisa(idAtualizar, novoNome, novoPreco, novoTamanho);
                         System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa com ID " + idAtualizar + " atualizada com sucesso!" + Cores.TEXT_RESET);
-                    } else {
-                        System.out.println(Cores.TEXT_RED_BOLD + "❌ Produto não encontrado!" + Cores.TEXT_RESET);
+                    } catch (java.util.InputMismatchException e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ Entrada inválida (ID ou preço)!" + Cores.TEXT_RESET);
+                        leia.nextLine();
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ " + e.getMessage() + Cores.TEXT_RESET);
                     }
                     break;
                 case 5:
                     System.out.println("🗑 Remover Camisa");
-                    System.out.print("Digite o ID: ");
-                    int idRemover;
                     try {
-                        idRemover = leia.nextInt();
+                        System.out.print("Digite o ID: ");
+                        int idRemover = leia.nextInt();
                         leia.nextLine();
+                        controller.removerCamisa(idRemover);
+                        System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa com ID " + idRemover + " removida com sucesso!" + Cores.TEXT_RESET);
                     } catch (java.util.InputMismatchException e) {
                         System.out.println(Cores.TEXT_RED_BOLD + "❌ ID inválido!" + Cores.TEXT_RESET);
                         leia.nextLine();
-                        break;
-                    }
-                    Produto produtoRemover = repositorio.buscarPorId(idRemover);
-                    if (produtoRemover != null) {
-                        repositorio.remover(idRemover);
-                        System.out.println(Cores.TEXT_GREEN_BOLD + "✅ Camisa com ID " + idRemover + " removida com sucesso!" + Cores.TEXT_RESET);
-                    } else {
-                        System.out.println(Cores.TEXT_RED_BOLD + "❌ Produto não encontrado!" + Cores.TEXT_RESET);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(Cores.TEXT_RED_BOLD + "❌ " + e.getMessage() + Cores.TEXT_RESET);
                     }
                     break;
                 default:

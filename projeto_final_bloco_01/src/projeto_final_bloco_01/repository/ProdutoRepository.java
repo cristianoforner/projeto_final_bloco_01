@@ -5,7 +5,6 @@ import java.util.List;
 
 import projeto_final_bloco_01.model.Produto;
 
-
 public class ProdutoRepository implements Repository {
     private List<Produto> produtos;
     private static int proximoId = 1;
@@ -14,11 +13,15 @@ public class ProdutoRepository implements Repository {
         produtos = new ArrayList<>();
     }
 
+    // Método auxiliar para acessar a lista de produtos
+    public List<Produto> getProdutos() {
+        return produtos;
+    }
+
     @Override
     public void cadastrar(Produto produto) {
         produto.setId(proximoId++);
         produtos.add(produto);
-        
     }
 
     @Override
@@ -47,11 +50,9 @@ public class ProdutoRepository implements Repository {
         for (int i = 0; i < produtos.size(); i++) {
             if (produtos.get(i).getId() == produto.getId()) {
                 produtos.set(i, produto);
-                
                 return;
             }
         }
-        System.out.println("❌ Produto não encontrado!");
     }
 
     @Override
@@ -59,11 +60,8 @@ public class ProdutoRepository implements Repository {
         for (int i = 0; i < produtos.size(); i++) {
             if (produtos.get(i).getId() == id) {
                 produtos.remove(i);
-               
                 return;
             }
         }
-        System.out.println("❌ Produto não encontrado!");
     }
-
-	}
+}
